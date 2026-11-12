@@ -28,6 +28,7 @@ try{
   await page.locator('#taskDescription').fill('Draw a lighthouse at sunrise');await page.getByRole('button',{name:'Suggest idea'}).click();await page.getByText('Draw a lighthouse at sunrise',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Resume Brain',exact:true}).click();
   await page.waitForFunction(()=>document.querySelectorAll('.request-card').length>0,{},{timeout:40000});
+  const city=await(await fetch('http://127.0.0.1:3099/api/city')).json();assert.ok(city.visits.length>0);assert.equal(city.places.length,10);assert.ok(await page.locator('#cityLocation').textContent());
   await page.getByRole('button',{name:'Grant',exact:true}).first().click();await page.getByText('✓ You granted this request').waitFor();
   await page.getByRole('button',{name:'Open result',exact:true}).first().waitFor();await page.getByRole('button',{name:'Open result',exact:true}).first().click();await page.frameLocator('#preview').locator('svg').waitFor();await page.getByRole('button',{name:'Close gallery'}).click();
   assert.ok((await(await fetch('http://127.0.0.1:3099/api/world')).json()).objects.length>0);
