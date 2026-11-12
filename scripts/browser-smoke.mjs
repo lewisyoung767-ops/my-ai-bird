@@ -31,6 +31,9 @@ try{
   await page.getByRole('button',{name:'Open result',exact:true}).first().waitFor();await page.getByRole('button',{name:'Open result',exact:true}).first().click();await page.frameLocator('#preview').locator('svg').waitFor();await page.getByRole('button',{name:'Close gallery'}).click();
   assert.ok((await(await fetch('http://127.0.0.1:3099/api/world')).json()).objects.length>0);
   await page.getByRole('button',{name:'Internet: on',exact:true}).click();await page.getByRole('button',{name:'Internet: off',exact:true}).waitFor();await page.getByRole('button',{name:'Reset room additions'}).click();
+  await page.getByText('Practice history and feedback',{exact:true}).click();await page.getByRole('button',{name:'Needs work',exact:true}).first().click();await page.getByText('Feedback saved. Pip will consider it in its next decision.',{exact:true}).waitFor();
+  await page.waitForFunction(async()=>{const box=await(await fetch('/api/toolbox')).json();return box.runs.some(r=>r.ok&&r.result?.doubled===42);},null,{timeout:25000});
+  await fs.copyFile('test/fixtures/cube.stl','bird_creations/test-cube.stl');await page.getByRole('button',{name:'Gallery / Desk'}).click();await page.getByRole('button',{name:/test-cube.stl/}).click();await page.locator('#modelPreview').waitFor({state:'visible'});await page.getByText(/12 triangles/).waitFor();await page.screenshot({path:'test-results/model-preview.png',fullPage:true});await page.getByRole('button',{name:'Close gallery'}).click();
   await page.screenshot({path:'test-results/conversation.png',fullPage:true});
   await page.setViewportSize({width:390,height:844});await page.waitForTimeout(500);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await page.screenshot({path:'test-results/room-mobile.png',fullPage:true});

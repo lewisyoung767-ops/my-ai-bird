@@ -1,4 +1,5 @@
-export const taskKinds=['drawing','toy','story','research','other'];
+import {validatePractice} from './learning-ledger.js';
+export const taskKinds=['drawing','toy','story','research','model','other'];
 export const propKinds=['plant','lamp','books','table','chair','perch','picture','box','sphere','cylinder'];
 export const initialRoom={wall_color:'#f0e6cf',floor_color:'#dfb98a',objects:[]};
 const short=(v,max)=>typeof v==='string'&&v.trim().length>0&&v.length<=max;
@@ -14,7 +15,10 @@ export function validateExtensions(raw){
     if(room.op==='remove'&&!short(room.id,80))throw new Error('Invalid decoration id');
     if(room.op==='style'&&(!colour(room.wall_color)||!colour(room.floor_color)))throw new Error('Invalid room colours');
   }
-  return {web_action:web,task_update:task,scene_action:room,mind_update:raw.mind_update||null};
+  const tool_update=raw.tool_update||null,tool_action=raw.tool_action||null;
+  if(tool_update&&(!short(tool_update.name,80)||!short(tool_update.purpose,400)||!short(tool_update.usage,600)||!short(tool_update.filename,90)))throw new Error('Invalid self-made tool definition');
+  if(tool_action&&(!short(tool_action.id,80)||typeof tool_action.input_json!=='string'||tool_action.input_json.length>2500))throw new Error('Invalid self-made tool input');
+  return {web_action:web,task_update:task,scene_action:room,mind_update:raw.mind_update||null,practice:validatePractice(raw.practice),tool_update,tool_action};
 }
 export function applyRoomAction(room,action,id){
   const next=structuredClone(room);
@@ -25,6 +29,9 @@ export function applyRoomAction(room,action,id){
 }
 const nullableString={type:['string','null']};
 export const extensionSchemas={
+  tool_update:{anyOf:[{type:'null'},{type:'object',required:['name','purpose','usage','filename'],properties:{name:{type:'string',maxLength:80},purpose:{type:'string',maxLength:400},usage:{type:'string',maxLength:600},filename:{type:'string'}}}]},
+  tool_action:{anyOf:[{type:'null'},{type:'object',required:['id','input_json'],properties:{id:{type:'string'},input_json:{type:'string',maxLength:2500}}}]},
+  practice:{anyOf:[{type:'null'},{type:'object',additionalProperties:false,required:['skill','goal','technique_id','lesson','evidence_file'],properties:{skill:{type:'string',minLength:1,maxLength:80},goal:{type:'string',maxLength:240},technique_id:nullableString,lesson:{type:['string','null'],maxLength:400},evidence_file:nullableString}}]},
   web_action:{anyOf:[{type:'null'},{type:'object',required:['type','query','url'],properties:{type:{type:'string',enum:['search','read']},query:nullableString,url:nullableString}}]},
   task_update:{anyOf:[{type:'null'},{type:'object',required:['id','title','kind','status','summary','result_file'],properties:{id:nullableString,title:nullableString,kind:{type:'string',enum:taskKinds},status:{type:'string',enum:['in_progress','completed','deferred']},summary:{type:'string',maxLength:600},result_file:nullableString}}]},
   scene_action:{anyOf:[{type:'null'},

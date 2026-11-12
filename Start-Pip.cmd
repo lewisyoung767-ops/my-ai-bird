@@ -7,7 +7,7 @@ if errorlevel 1 (
   exit /b 1
 )
 set "PIP_NEEDS_INSTALL="
-for %%P in (express socket.io openai three dotenv cheerio ipaddr.js) do if not exist "node_modules\%%P\package.json" set "PIP_NEEDS_INSTALL=1"
+for %%P in (express socket.io openai three dotenv cheerio ipaddr.js saxes) do if not exist "node_modules\%%P\package.json" set "PIP_NEEDS_INSTALL=1"
 if defined PIP_NEEDS_INSTALL (
   call npm.cmd install
   if errorlevel 1 (

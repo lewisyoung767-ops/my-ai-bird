@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-const extensions = new Set(['.svg', '.html', '.txt', '.json']);
+const extensions = new Set(['.svg', '.html', '.txt', '.json', '.stl', '.scad']);
 export async function safePath(root, name) {
   // Flat names deliberately disallow directories, traversal, Windows ADS and device names.
-  if (typeof name !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,70}\.(svg|html|txt|json)$/.test(name) || /^(con|prn|aux|nul|com[0-9]|lpt[0-9])\./i.test(name)) throw new Error('Invalid creation filename');
+  if (typeof name !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,70}\.(svg|html|txt|json|stl|scad)$/.test(name) || /^(con|prn|aux|nul|com[0-9]|lpt[0-9])\./i.test(name)) throw new Error('Invalid creation filename');
   if (!extensions.has(path.extname(name))) throw new Error('Unsupported file type');
   const realRoot = await fs.realpath(root);
   const target = path.resolve(realRoot, name);
