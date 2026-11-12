@@ -1,4 +1,8 @@
+import {installToolRunner} from './tool-runner.js';
+import {installLearning} from './learning.js';
 export function installWorkshop({socket,openCreation,getState}){
+  installLearning({socket,openCreation});
+  installToolRunner({socket,openCreation});
   const $=id=>document.getElementById(id);const status=text=>$('workshopStatus').textContent=text;
   const send=(event,payload)=>new Promise(resolve=>socket.timeout(6000).emit(event,payload,(error,result)=>{if(error||result?.error)status(result?.error||'Connection interrupted. Please try again.');resolve(!error&&!result?.error);}));
   $('taskForm').onsubmit=async e=>{e.preventDefault();if(await send('task:submit',{kind:$('taskKind').value,description:$('taskDescription').value})){$('taskDescription').value='';status(getState()?.demo?'Queued. Demo mode will make a sample result. Enable AI mode for original work.':'Idea added. Pip will choose how to approach it on a future cycle.');}};
@@ -30,6 +34,6 @@ export function installWorkshop({socket,openCreation,getState}){
   socket.on('state',state=>{
     $('demoNotice').hidden=!state.demo&&!state.error;
     $('demoNotice').textContent=state.error?'Pip’s brain needs attention: '+state.error:state.demo?'DEMO MODE: thoughts and examples are scripted. Run Setup-Local-AI.cmd and restart Pip for independent AI decisions.':'';
-    $('brainActivity').textContent=state.paused?'Paused':state.brainStatus==='researching'?'Reading the internet':state.brainStatus==='thinking'?'Choosing its next action':state.brainStatus==='error'?'AI needs attention':state.creating?'Making a real creation':'Free to choose its next project';
+    $('brainActivity').textContent=state.paused?'Paused':state.brainStatus==='testing_tool'?'Testing a self-made tool':state.brainStatus==='researching'?'Reading the internet':state.brainStatus==='thinking'?'Choosing its next action':state.brainStatus==='error'?'AI needs attention':state.creating?'Making a real creation':'Free to choose its next project';
   });
 }

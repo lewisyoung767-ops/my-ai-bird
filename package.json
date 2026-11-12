@@ -7,7 +7,7 @@
     "start": "node start.js",
     "dev": "node --watch start.js",
     "test": "node --test",
-    "check": "node --check server.js && node --check public/app.js && node --check brain.js && node --check workspace.js && node --check ai-provider.js && node --check local-runtime.js && node --check scripts/setup-local-ai.mjs && node --check features.js && node --check web-reader.js && node --check autonomy.js && node --check public/workshop.js && node --check public/room-decorations.js && node --check scripts/update-pip.mjs"
+    "check": "node --check server.js && node --check public/app.js && node --check brain.js && node --check workspace.js && node --check ai-provider.js && node --check local-runtime.js && node --check scripts/setup-local-ai.mjs && node --check features.js && node --check web-reader.js && node --check autonomy.js && node --check public/workshop.js && node --check public/room-decorations.js && node --check scripts/update-pip.mjs && node --check learning.js && node --check learning-ledger.js && node --check artifact-review.js && node --check public/learning.js && node --check toolbox.js && node --check public/tool-runner.js && node --check public/model-format.js && node --check public/model-preview.js"
   },
   "engines": {
     "node": ">=22"
@@ -19,7 +19,8 @@
     "socket.io": "^4.8.1",
     "three": "^0.171.0",
     "cheerio": "^1.0.0",
-    "ipaddr.js": "^2.2.0"
+    "ipaddr.js": "^2.2.0",
+    "saxes": "^6.0.0"
   },
   "devDependencies": {
     "playwright": "^1.48.2"

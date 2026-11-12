@@ -1,10 +1,11 @@
+import {showModel} from './model-preview.js';
 import {installWorkshop} from './workshop.js';
 import {createDecorations} from './room-decorations.js';
 import * as THREE from '/vendor/three.module.js';
 
 const $ = id => document.getElementById(id);
 const socket = io();
-let worldState,updateWorld;
+let worldState,updateWorld,stopModel;
 socket.on('world',world=>{worldState=world;updateWorld?.(world);});
 installWorkshop({socket,getState:()=>state,openCreation:async name=>{$('gallery').showModal();await refreshFiles();await openFile(name);}});
 let state, bird, scene, renderer, camera, deskLight, sparkles, yaw = .68, currentFile, downloadUrl, showSource = false;
@@ -61,7 +62,8 @@ $('messageForm').onsubmit=e=>{
 function renderMemories(memories){const history=$('thoughtHistory');history.replaceChildren();for(const memory of [...memories].reverse()){const article=document.createElement('article');const label=document.createElement('small');label.textContent=`Cycle ${memory.cycle} · ${new Date(memory.at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})} · ${memory.action_label.replaceAll('_',' ')}`;const p=document.createElement('p');p.textContent=memory.thought;article.append(label,p);history.append(article);}if(!memories.length)history.textContent='The first little thought is still forming.';}
 socket.on('memories',renderMemories);
 fetch('/api/memories').then(r=>r.json()).then(renderMemories).catch(()=>{});
-$('galleryButton').onclick=()=>{$('gallery').showModal();refreshFiles();};
+$('galleryButton').onclick=()=>{$('gallery').showModal();refreshFiles(true);};
+$('gallery').addEventListener('close',()=>{stopModel?.();stopModel=null;});
 $('closeGallery').onclick=()=> $('gallery').close();
 $('gallery').addEventListener('click', e=> { if(e.target===$('gallery')) {const r=$('gallery').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('gallery').close();} });
 socket.on('creations:changed',()=>{if($('gallery').open)refreshFiles(true);});
@@ -86,9 +88,13 @@ async function openFile(name) {
 }
 $('sourceButton').onclick=()=>{showSource=!showSource;renderFile();};
 function renderFile() {
+  stopModel?.();stopModel=null;
   $('preview').src='about:blank';
   const visual=/\.(html|svg)$/.test(currentFile.name)&&!showSource;
-  $('source').hidden=visual;$('preview').hidden=!visual;$('sourceButton').textContent=showSource?'View preview':'View source';
+  const model=currentFile.name.endsWith('.stl')&&!showSource;
+  $('modelPreview').hidden=!model;$('modelInfo').hidden=!model;
+  if(model)stopModel=showModel($('modelPreview'),$('modelInfo'),currentFile.content);
+  $('source').hidden=visual||model;$('preview').hidden=!visual;$('sourceButton').textContent=showSource?'View preview':'View source';
   $('source').textContent=currentFile.content;
   if(visual){
     // Opaque-origin sandbox: scripts allowed for toys, but no same-origin, forms,

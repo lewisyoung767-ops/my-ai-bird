@@ -10,7 +10,7 @@ import { listCreations, readCreation, writeCreation } from './workspace.js';
 import { initialMind, demoDecision, validateDecision, validateMind, sampleSvg } from './brain.js';
 import { brainConfig, createBrain, decisionSchema, reflectionSchema } from './ai-provider.js';
 import {createFeatures} from './features.js';
-import {AUTONOMY_PROMPT} from './autonomy-prompt.js';
+import {AUTONOMY_PROMPT,LEARNING_GUIDANCE,TOOL_GUIDANCE} from './autonomy-prompt.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const creations = path.join(root, 'bird_creations');
@@ -124,7 +124,7 @@ io.on('connection', socket => {
   });
   socket.on('brain:pause', paused => {
     if (typeof paused !== 'boolean') return;
-    if(paused && !state.paused){brainEpoch++;features.abortWeb();}
+    if(paused && !state.paused){brainEpoch++;features.abortWeb();features.abortTools();}
     state.paused = paused;
     if (paused) { clearTimeout(timer); state.nextCycleAt = null; emit(); }
     else if (!running) schedule();
@@ -142,21 +142,22 @@ async function cycle() {
     state.brainStatus='thinking';emit();
     const context={mind,stats:{energy:state.energy,hunger:state.hunger,mood:state.mood},memories:memories.slice(-12),conversation:conversations.slice(-25),files:recentFiles,...features.context(),repetition_hint:memories.slice(-4).length===4&&new Set(memories.slice(-4).map(m=>m.action_label)).size===1?'You have repeated the same action four times. Consider a different concrete project or a new interest.':null};
     let decision = validateDecision(demo ? features.demoDecision(demoDecision(number),number,sampleSvg) : await ask(
-      AUTONOMY_PROMPT,
+      AUTONOMY_PROMPT+LEARNING_GUIDANCE+TOOL_GUIDANCE,
       context, decisionSchema
     ));
-    if(decision.web_action){
+    if(decision.web_action||decision.tool_action){
       if(state.paused||stopping||epoch!==brainEpoch)return;
-      state.brainStatus='researching';state.thought=decision.thought;emit();
-      const web_result=await features.web(decision.web_action,new AbortController().signal);
+      state.brainStatus=decision.tool_action?'testing_tool':'researching';state.thought=decision.thought;emit();
+      const web_result=decision.tool_action?await features.runTool(decision.tool_action):await features.web(decision.web_action,new AbortController().signal);
       if(state.paused||stopping||epoch!==brainEpoch)return;
-      if(!demo)decision=validateDecision(await ask(AUTONOMY_PROMPT,{...context,...features.context(),web_result},decisionSchema));
+      if(!demo)decision=validateDecision(await ask(AUTONOMY_PROMPT+LEARNING_GUIDANCE+TOOL_GUIDANCE,{...context,...features.context(),web_result},decisionSchema));
     }
     if (state.paused || stopping || epoch !== brainEpoch) return; // Discard results even if resumed before inference finishes.
     state = { ...state, ...decision, cycle:number, creating: !!decision.create_or_edit_file };
     delete state.create_or_edit_file;
     delete state.question_for_you; delete state.request_for_you; delete state.message_for_you;
     delete state.web_action;delete state.task_update;delete state.scene_action;delete state.mind_update;
+    delete state.practice;delete state.tool_update;delete state.tool_action;
     state.brainStatus='acting';
     state.energy = Math.max(5, Math.min(100, state.energy + (decision.target === 'bed' ? 18 : -3)));
     state.hunger = Math.max(0, Math.min(100, state.hunger + (decision.target === 'bowl' ? -25 : 4)));

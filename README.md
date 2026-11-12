@@ -4,6 +4,26 @@ A cosy 3D virtual bird that chooses projects, makes drawings/games/stories, read
 
 ## Real autonomy, projects and results
 
+## Learning without a prescribed curriculum
+
+Pip names its own interests and skills. There is **no predefined subject/hobby list**. The learning notebook starts without subject cards; a card appears when Pip chooses a named skill and saves a distinct result while practising it. A new topic or practice plan alone is not counted as progress. Existing interests remain optional and Pip may change direction at any time.
+
+After a result is actually saved, Pip receives concrete technical checks and improvement suggestions in later decisions. It may repair earlier work, propose a technique with a reviewed file as evidence, and test that technique on later work. Lessons start as **candidates**. Repeated improved checks or helpful feedback on later applications can mark a lesson **supported**; regressions or negative feedback flag it **revisit**. These are observations, not proof of mastery or that the technique caused the improvement.
+
+Open **Learning notebook → Practice history and feedback** to inspect checks and mark a result **Helpful** or **Needs work**, with an optional explanation. Feedback reaches the next brain cycle and survives restarts in `data/learning.json`. Correcting a rating replaces the old vote. The notebook retains 150 distinct checked revisions and 60 lessons, including original lesson baselines. Identical content is not a new attempt even under a different filename; demo examples do not increase real-practice totals. Technical trends compare results with the same file-format rubric: the latest three real results against the previous three, after at least six comparable results.
+
+Checks measure file structure and limited properties, **not artistic quality, complete factual correctness, a working game, or intelligence**. JavaScript is compiled for syntax checking but never executed on the server. Feedback and the model’s own judgement are still needed. Learning here means persistent experience, feedback, reusable methods and better-informed choices; the underlying model’s weights are not retrained.
+
+## Pip inventing its own methods
+
+When Pip needs a new capability, it can create a reusable file and register it under **Ways and tools Pip has invented**. Runnable tools are self-contained HTML programs using the input/result message interface described in `AGENTS.md`. Pip can choose their purpose, send JSON input, inspect actual output or errors, then revise the tool. There is no activity catalogue. This expands what it can compute and create inside the app; it does not make every real-world activity possible.
+
+An open browser tab executes these tools in an opaque-origin iframe with network access, accounts, filesystem access, popups and top navigation blocked. Only the selected frame’s matching result message is accepted. The server never executes generated code. Input/results are bounded, timeout/cancellation is supported, and successful outputs are saved as real JSON creations. Tool definitions and recent runs persist in `data/toolbox.json`. A browser must be open for execution. Procedures and design files can also be registered, but are not automatically executable. Physical devices and external accounts require separately implemented connections and authorisation; Pip cannot install arbitrary software or run system commands.
+
+## 3D designs
+
+Pip can now create ASCII `.stl` models and `.scad` OpenSCAD design source. STL files have a live draggable gallery preview; SCAD is shown as source and can be downloaded for OpenSCAD. The notebook checks STL triangles, shared edges, winding and volume, and basic SCAD structure. This **does not certify printability**: verify dimensions/units, wall thickness, self-intersections and supports in a slicer. Pip neither executes SCAD nor sends a model to a physical printer. These formats are tools, not restrictions on what subjects it may choose.
+
 **AI mode** lets Pip choose its own actions and interests. It can start projects without a human request, change focus at any cycle, and reflect on its progress every ten cycles. The original fixed bug interest is no longer a starter requirement. Existing memories are preserved; the untouched original bug-focused starter mind is migrated to a broader creative focus.
 
 Use **Pip’s studio** to suggest a drawing, interactive game/toy, story, research task or other idea. Pip can accept, choose its own approach or defer with a reason. Its own projects appear on the same board. A task is only marked complete when its named result file actually exists and contains content. **Open result** displays it in the gallery; drawings also get a preview on the board. Thoughts alone never complete a task. The page clearly identifies demo mode and model errors. Demo produces sample files, not original AI reasoning.

@@ -21,6 +21,8 @@ export function localContext(context) {
     conversation:context.conversation?.slice(-8).map(m=>({...m,text:m.text?.slice(0,650)})),
     files:context.files?.slice(0,2).map(f=>({name:f.name,content:f.content.slice(0,1800)})),
     tasks:context.tasks?.slice(-4).map(t=>({...t,description:t.description?.slice(0,250),summary:t.summary?.slice(0,180)})),research:context.research?.slice(-2).map(r=>({...r,text:r.text?.slice(0,600),results:r.results?.slice(0,3).map(h=>({...h,snippet:h.snippet?.slice(0,100)}))})),
+    toolbox:context.toolbox?{tools:context.toolbox.tools?.slice(-6).map(t=>({...t,purpose:t.purpose.slice(0,180),usage:t.usage.slice(0,250)})),recent_runs:context.toolbox.recent_runs?.slice(-1).map(r=>({...r,result:JSON.stringify(r.result).slice(0,1000)}))}:undefined,
+    learning:context.learning?{...context.learning,lessons:context.learning.lessons?.slice(-3).map(l=>({id:l.id,skill:l.skill,rule:l.rule,status:l.status,evidence_file:l.evidence_file,next_practice:l.next_practice})),recent_results:context.learning.recent_results?.slice(-2)}:undefined,
     web_result:context.web_result?{...context.web_result,text:context.web_result.text?.slice(0,2000),results:context.web_result.results?.slice(0,4).map(h=>({...h,snippet:h.snippet?.slice(0,180)}))}:undefined};
   if(JSON.stringify(result).length>14000){result.memories=result.memories?.slice(-2);result.conversation=result.conversation?.slice(-4).map(m=>({...m,text:m.text?.slice(0,350)}));result.files=result.files?.slice(0,1).map(f=>({...f,content:f.content.slice(0,1000)}));result.tasks=result.tasks?.slice(-3);result.research=result.research?.slice(-1);}
   if(JSON.stringify(result).length>16000){result.files=[];result.memories=result.memories?.slice(-1);result.conversation=result.conversation?.slice(-2);result.research=[];result.tasks=result.tasks?.slice(-2);if(result.web_result?.text)result.web_result.text=result.web_result.text.slice(0,1000);}
@@ -42,7 +44,7 @@ export function createBrain(config,{openAIClient,fetchImpl=fetch}={}) {
       return response.json();
     }
     if(!verified){const info=await post('/api/show',{model:config.model});if(info.remote_host||info.remote_model)throw new Error('This model uses cloud inference. Choose a downloaded local model.');verified=true;}
-    const result=await post('/api/chat',{model:config.model,stream:false,format:schema||'json',keep_alive:'5m',options:{num_ctx:8192,num_predict:2400,temperature:0.8},messages:[{role:'system',content:system+' Return only one complete JSON object. Keep file creations short (under 4000 characters).'},{role:'user',content:JSON.stringify(localContext(context))}]});
+    const result=await post('/api/chat',{model:config.model,stream:false,format:schema||'json',keep_alive:'5m',options:{num_ctx:12288,num_predict:2400,temperature:0.8},messages:[{role:'system',content:system+' Return only one complete JSON object. Keep file creations short (under 4000 characters).'},{role:'user',content:JSON.stringify(localContext(context))}]});
     if(result.done_reason==='length')throw new Error('Local AI response was cut short. Pip will try again next cycle.');
     return JSON.parse(result.message.content);
   };
