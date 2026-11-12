@@ -29,6 +29,7 @@ try{
   await page.waitForFunction(()=>document.querySelectorAll('.request-card').length>0,{},{timeout:40000});
   await page.getByRole('button',{name:'Grant',exact:true}).first().click();await page.getByText('✓ You granted this request').waitFor();
   await page.getByRole('button',{name:'Open result',exact:true}).first().waitFor();await page.getByRole('button',{name:'Open result',exact:true}).first().click();await page.frameLocator('#preview').locator('svg').waitFor();await page.getByRole('button',{name:'Close gallery'}).click();
+  assert.ok((await(await fetch('http://127.0.0.1:3099/api/world')).json()).objects.length>0);
   await page.getByRole('button',{name:'Internet: on',exact:true}).click();await page.getByRole('button',{name:'Internet: off',exact:true}).waitFor();await page.getByRole('button',{name:'Reset room additions'}).click();
   await page.screenshot({path:'test-results/conversation.png',fullPage:true});
   await page.setViewportSize({width:390,height:844});await page.waitForTimeout(500);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);

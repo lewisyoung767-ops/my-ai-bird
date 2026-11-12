@@ -20,8 +20,10 @@ export function localContext(context) {
     memories:context.memories?.slice(-5).map(m=>({...m,thought:m.thought?.slice(0,400)})),
     conversation:context.conversation?.slice(-8).map(m=>({...m,text:m.text?.slice(0,650)})),
     files:context.files?.slice(0,2).map(f=>({name:f.name,content:f.content.slice(0,1800)})),
-    tasks:context.tasks?.slice(-4).map(t=>({...t,description:t.description?.slice(0,300)})),research:context.research?.slice(-2).map(r=>({...r,text:r.text?.slice(0,800)}))};
-  if(JSON.stringify(result).length>16000){result.memories=result.memories?.slice(-2);result.conversation=result.conversation?.slice(-4);result.files=result.files?.slice(0,1).map(f=>({...f,content:f.content.slice(0,1000)}));}
+    tasks:context.tasks?.slice(-4).map(t=>({...t,description:t.description?.slice(0,250),summary:t.summary?.slice(0,180)})),research:context.research?.slice(-2).map(r=>({...r,text:r.text?.slice(0,600),results:r.results?.slice(0,3).map(h=>({...h,snippet:h.snippet?.slice(0,100)}))})),
+    web_result:context.web_result?{...context.web_result,text:context.web_result.text?.slice(0,2000),results:context.web_result.results?.slice(0,4).map(h=>({...h,snippet:h.snippet?.slice(0,180)}))}:undefined};
+  if(JSON.stringify(result).length>14000){result.memories=result.memories?.slice(-2);result.conversation=result.conversation?.slice(-4).map(m=>({...m,text:m.text?.slice(0,350)}));result.files=result.files?.slice(0,1).map(f=>({...f,content:f.content.slice(0,1000)}));result.tasks=result.tasks?.slice(-3);result.research=result.research?.slice(-1);}
+  if(JSON.stringify(result).length>16000){result.files=[];result.memories=result.memories?.slice(-1);result.conversation=result.conversation?.slice(-2);result.research=[];result.tasks=result.tasks?.slice(-2);if(result.web_result?.text)result.web_result.text=result.web_result.text.slice(0,1000);}
   return result;
 }
 export function createBrain(config,{openAIClient,fetchImpl=fetch}={}) {
