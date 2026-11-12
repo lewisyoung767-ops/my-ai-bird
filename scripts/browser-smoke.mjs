@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 await fs.mkdir('test-results',{recursive:true});
-const server=spawn(process.execPath,['start.js'],{env:{...process.env,PORT:'3099',DEMO_MODE:'true',CYCLE_SECONDS:'5'},stdio:['ignore','pipe','pipe']});
+const server=spawn(process.execPath,['start.js'],{env:{...process.env,PORT:'3099',DEMO_MODE:'true',CYCLE_SECONDS:'5',CITY_SPEED:'50'},stdio:['ignore','pipe','pipe']});
 let output='';server.stdout.on('data',d=>output+=d);server.stderr.on('data',d=>output+=d);
 let browser;
 try{
@@ -13,6 +13,7 @@ try{
   const page=await browser.newPage({viewport:{width:1440,height:1050}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:3099');await page.getByText('Connected',{exact:true}).waitFor();
   await page.waitForTimeout(2000);assert.equal(await page.locator('#renderError').isVisible(),false);
+  await page.locator('#cityMap').waitFor();await page.locator('#cityOverview').click();assert.equal(await page.locator('#cityOverview').getAttribute('aria-pressed'),'true');
   await page.screenshot({path:'test-results/room-desktop.png',fullPage:true});
   await page.getByRole('button',{name:'Pause Brain',exact:true}).click();await page.getByRole('button',{name:'Resume Brain',exact:true}).waitFor();
   await page.getByRole('button',{name:'Gallery / Desk'}).click();await page.getByRole('button',{name:/first-sketch.svg/}).click();await page.locator('#preview').waitFor({state:'visible'});
@@ -27,6 +28,7 @@ try{
   await page.locator('#taskDescription').fill('Draw a lighthouse at sunrise');await page.getByRole('button',{name:'Suggest idea'}).click();await page.getByText('Draw a lighthouse at sunrise',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Resume Brain',exact:true}).click();
   await page.waitForFunction(()=>document.querySelectorAll('.request-card').length>0,{},{timeout:40000});
+  const city=await(await fetch('http://127.0.0.1:3099/api/city')).json();assert.ok(city.visits.length>0);assert.equal(city.places.length,10);assert.ok(await page.locator('#cityLocation').textContent());
   await page.getByRole('button',{name:'Grant',exact:true}).first().click();await page.getByText('✓ You granted this request').waitFor();
   await page.getByRole('button',{name:'Open result',exact:true}).first().waitFor();await page.getByRole('button',{name:'Open result',exact:true}).first().click();await page.frameLocator('#preview').locator('svg').waitFor();await page.getByRole('button',{name:'Close gallery'}).click();
   assert.ok((await(await fetch('http://127.0.0.1:3099/api/world')).json()).objects.length>0);

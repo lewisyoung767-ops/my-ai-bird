@@ -1,4 +1,5 @@
 import {validateExtensions} from './autonomy.js';
+import {validateDestination} from './public/city-map.js';
 export const targets = ['bed', 'bowl', 'desk', 'window', 'random_spot'];
 export const initialMind = { core_traits: ['curious', 'independent', 'inventive'], current_obsession: 'Discovering what I can make, learn and change', active_project: 'Choosing my first real project', worldview: 'I can try new things and change my mind about what matters.' };
 export const sampleSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="#f9f0d9"/><circle cx="620" cy="140" r="70" fill="#edbc62"/><path d="M0 420 Q180 220 400 410 Q640 240 800 400 V600 H0" fill="#a8bd82"/><path d="M0 500 Q300 350 800 490 V600 H0" fill="#7e9e75"/><rect x="300" y="290" width="160" height="150" fill="#e6b789"/><path d="M270 300 L380 210 L490 300" fill="#ad735f"/><rect x="360" y="350" width="45" height="90" fill="#557362"/><text x="400" y="70" text-anchor="middle" font-family="Georgia" font-size="32" fill="#496140">A small place for a big idea</text></svg>`;
@@ -19,7 +20,7 @@ export function validateDecision(raw) {
   for (const key of ['question_for_you','request_for_you','message_for_you']) if (raw[key] != null && (typeof raw[key] !== 'string' || raw[key].length > 600)) throw new Error(`Invalid ${key}`);
   const extensions=validateExtensions(raw);
   if(extensions.mind_update)extensions.mind_update=validateMind(extensions.mind_update);
-  return { thought: raw.thought, action_label: raw.action_label, target: raw.target, create_or_edit_file: raw.create_or_edit_file || null, question_for_you: raw.question_for_you || null, request_for_you: raw.request_for_you || null, message_for_you: raw.message_for_you || null,...extensions };
+  return { thought: raw.thought, action_label: raw.action_label, target: raw.target, destination:validateDestination(raw.destination),create_or_edit_file: raw.create_or_edit_file || null, question_for_you: raw.question_for_you || null, request_for_you: raw.request_for_you || null, message_for_you: raw.message_for_you || null,...extensions };
 }
 export function validateMind(raw) {
   if (!raw || !Array.isArray(raw.core_traits) || raw.core_traits.length < 1 || raw.core_traits.length > 8 || raw.core_traits.some(t => typeof t !== 'string' || t.length > 120)) throw new Error('Invalid traits');

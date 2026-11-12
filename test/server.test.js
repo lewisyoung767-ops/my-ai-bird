@@ -12,11 +12,11 @@ test('demo server starts, serves room, seeds gallery, and exposes working Socket
   const temp=await fs.mkdtemp(path.join(os.tmpdir(),'pip-smoke-'));
   let child;
   try{
-    for(const name of ['server.js','workspace.js','brain.js','autonomy.js','features.js','toolbox.js','learning.js','learning-ledger.js','artifact-review.js','web-reader.js','autonomy-prompt.js','ai-provider.js','package.json'])await fs.copyFile(path.join(project,name),path.join(temp,name));
+    for(const name of ['server.js','city.js','workspace.js','brain.js','autonomy.js','features.js','toolbox.js','learning.js','learning-ledger.js','artifact-review.js','web-reader.js','autonomy-prompt.js','ai-provider.js','package.json'])await fs.copyFile(path.join(project,name),path.join(temp,name));
     await fs.cp(path.join(project,'public'),path.join(temp,'public'),{recursive:true});
     await fs.symlink(path.join(project,'node_modules'),path.join(temp,'node_modules'),process.platform==='win32'?'junction':'dir');
     const probe=net.createServer();await new Promise(r=>probe.listen(0,'127.0.0.1',r));const port=probe.address().port;await new Promise(r=>probe.close(r));
-    let log='';child=spawn(process.execPath,['server.js'],{cwd:temp,env:{...process.env,DEMO_MODE:'true',PORT:String(port),CYCLE_SECONDS:'5'},stdio:['ignore','pipe','pipe']});
+    let log='';child=spawn(process.execPath,['server.js'],{cwd:temp,env:{...process.env,DEMO_MODE:'true',PORT:String(port),CYCLE_SECONDS:'5',CITY_SPEED:'50'},stdio:['ignore','pipe','pipe']});
     child.stdout.on('data',d=>log+=d);child.stderr.on('data',d=>log+=d);
     const base=`http://127.0.0.1:${port}`;
     let ready=false;for(let i=0;i<80;i++){try{const r=await fetch(base+'/api/health');if(r.ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,100));}

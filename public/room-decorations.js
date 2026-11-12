@@ -1,6 +1,6 @@
 import * as THREE from '/vendor/three.module.js';
-export function createDecorations(scene,{floorMaterial,wallMaterials}){
-  const root=new THREE.Group();scene.add(root);
+export function createDecorations(scene,{floorMaterial,wallMaterials,origin={x:0,z:0}}){
+  const root=new THREE.Group();root.position.set(origin.x,0,origin.z);scene.add(root);
   return world=>{
     for(const group of [...root.children]){group.traverse(o=>{o.geometry?.dispose();if(o.material){o.material.map?.dispose();o.material.dispose();}});root.remove(group);}
     if(world.floor_color)floorMaterial.color.set(world.floor_color);if(world.wall_color)wallMaterials.forEach(m=>m.color.set(world.wall_color));

@@ -19,10 +19,10 @@ test('real application startup uses a local model without an OpenAI key and pers
   });
   try{
     await new Promise(r=>mock.listen(0,'127.0.0.1',r));const localURL=`http://127.0.0.1:${mock.address().port}`;
-    for(const f of ['server.js','start.js','ai-provider.js','local-runtime.js','brain.js','autonomy.js','features.js','toolbox.js','learning.js','learning-ledger.js','artifact-review.js','web-reader.js','autonomy-prompt.js','workspace.js','package.json','.env.example'])await fs.copyFile(path.join(root,f),path.join(temp,f));
+    for(const f of ['server.js','city.js','start.js','ai-provider.js','local-runtime.js','brain.js','autonomy.js','features.js','toolbox.js','learning.js','learning-ledger.js','artifact-review.js','web-reader.js','autonomy-prompt.js','workspace.js','package.json','.env.example'])await fs.copyFile(path.join(root,f),path.join(temp,f));
     await fs.cp(path.join(root,'public'),path.join(temp,'public'),{recursive:true});await fs.symlink(path.join(root,'node_modules'),path.join(temp,'node_modules'),process.platform==='win32'?'junction':'dir');
     const portProbe=createServer();await new Promise(r=>portProbe.listen(0,'127.0.0.1',r));const port=portProbe.address().port;await new Promise(r=>portProbe.close(r));
-    let log='';child=spawn(process.execPath,['start.js'],{cwd:temp,env:{...process.env,OPENAI_API_KEY:'',AI_PROVIDER:'ollama',OLLAMA_BASE_URL:localURL,OLLAMA_MODEL:'qwen2.5:3b',DEMO_MODE:'false',PORT:String(port),CYCLE_SECONDS:'30'},stdio:['ignore','pipe','pipe']});
+    let log='';child=spawn(process.execPath,['start.js'],{cwd:temp,env:{...process.env,OPENAI_API_KEY:'',AI_PROVIDER:'ollama',OLLAMA_BASE_URL:localURL,OLLAMA_MODEL:'qwen2.5:3b',DEMO_MODE:'false',PORT:String(port),CYCLE_SECONDS:'30',CITY_SPEED:'50'},stdio:['ignore','pipe','pipe']});
     child.stdout.on('data',d=>log+=d);child.stderr.on('data',d=>log+=d);const base=`http://127.0.0.1:${port}`;
     let state;
     for(let i=0;i<100;i++){try{state=await(await fetch(base+'/api/state')).json();if(state.cycle===1)break;}catch{}await new Promise(r=>setTimeout(r,100));}
