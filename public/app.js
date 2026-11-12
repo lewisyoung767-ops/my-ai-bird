@@ -20,7 +20,7 @@ socket.on('state', next => {
   for(const name of ['energy','hunger','mood']) { $(name).value=state[name]; $(name+'Value').textContent=state[name]+'%'; }
   $('pauseButton').textContent=state.paused ? 'Resume Brain' : 'Pause Brain';
   $('pauseButton').setAttribute('aria-pressed',String(state.paused));
-  $('mode').textContent=state.demo ? 'DEMO MODE · A LITTLE IMAGINATION, NO API KEY' : 'OPENAI · A MIND OF ITS OWN';
+  $('mode').textContent=state.demo ? 'DEMO MODE · A LITTLE IMAGINATION, NO API KEY' : state.provider==='ollama' ? 'LOCAL AI · '+state.model+' · NO API CHARGES' : 'OPENAI · A MIND OF ITS OWN';
   $('brainError').hidden=!state.error; $('brainError').textContent=state.error || '';
   if(changed) target=state.target==='random_spot' ? new THREE.Vector3((Math.random()-.5)*3.5,.18,Math.random()*2) : destinations[state.target].clone();
 });

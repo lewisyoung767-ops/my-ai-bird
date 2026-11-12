@@ -1,6 +1,9 @@
 node_modules/
 .pnpm-store/
 .env
+.env.*
+!.env.example
+.local-ai/
 data/
 bird_creations/*
 !bird_creations/.gitkeep

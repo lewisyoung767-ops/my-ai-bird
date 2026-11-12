@@ -4,6 +4,8 @@
 Pip is a local autonomous 3D bird. Preserve beginner-friendly startup, demo mode without an API key, the bird’s freedom to invent actions, and strict confinement of all AI file capabilities.
 
 ## Files
+- `ai-provider.js`: validates demo/OpenAI/local Ollama configuration; calls native local `/api/show` and `/api/chat` with JSON schemas, bounded context and CPU-friendly timeouts. No API key in local requests; reject cloud model proxies and non-loopback endpoints. OpenAI still uses the official SDK.
+- `local-runtime.js`: finds installed/portable Ollama, starts a hidden background loopback server if needed, and updates only selected `.env` fields. `scripts/setup-local-ai.mjs` downloads and SHA-256 verifies the official matching Windows release, pulls qwen2.5:3b, tests a real response, then switches `.env`. Preserve private settings and never switch configuration before the connection test succeeds. `.local-ai/` and `.env.*` are Git-ignored, except `.env.example`.
 - `start.js`: switches to project directory, creates `.env` from `.env.example` without overwriting existing secrets, imports server.
 - `server.js`: Express HTTP and Socket.io server; validates configuration; owns one serial brain loop and pause state; persists mind/memories; invokes OpenAI JSON mode and validates output; reflects every tenth cycle.
 - `brain.js`: initial mind, deterministic demo sequence and runtime validation for decisions/reflection.
@@ -27,3 +29,5 @@ Keep API keys exclusively on the server. Never commit `.env`, node_modules, memo
 
 ## Development and verification
 Node >=22. `npm install`; `npm run check`; `npm test`; `npm start`. Default http://localhost:3000. For quick manual checks use CYCLE_SECONDS=5 in local `.env` and restore 30 afterward. Confirm movement, pause/resume, gallery refresh, sandboxed HTML interaction and desktop/mobile layouts. Live OpenAI testing requires the user’s API key and billing; never fabricate success when only demo mode was tested. Avoid adding external CDN/font dependencies.
+
+Local AI: `AI_PROVIDER=ollama`, `DEMO_MODE=false`, `OLLAMA_MODEL=qwen2.5:3b`, optional `OLLAMA_BASE_URL=http://127.0.0.1:11434`. Configuration is server-only. Use schema-constrained generation and validate all results with the same filesystem/action validators as OpenAI. The UI shows provider and model, and actionable local errors. No automatic paid fallback or sign-in. Pause behavior and serial scheduling are unchanged. Provider unit tests use injected transport; an integration test must also exercise a mock local HTTP service. Live local inference requires a real installed model; clearly distinguish it from mocked checks. Start-Pip runs startup preparation; direct server.js starts only the application, useful for integration tests.

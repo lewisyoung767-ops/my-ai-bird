@@ -12,7 +12,7 @@ test('demo server starts, serves room, seeds gallery, and exposes working Socket
   const temp=await fs.mkdtemp(path.join(os.tmpdir(),'pip-smoke-'));
   let child;
   try{
-    for(const name of ['server.js','workspace.js','brain.js','package.json'])await fs.copyFile(path.join(project,name),path.join(temp,name));
+    for(const name of ['server.js','workspace.js','brain.js','ai-provider.js','package.json'])await fs.copyFile(path.join(project,name),path.join(temp,name));
     await fs.cp(path.join(project,'public'),path.join(temp,'public'),{recursive:true});
     await fs.symlink(path.join(project,'node_modules'),path.join(temp,'node_modules'),process.platform==='win32'?'junction':'dir');
     const probe=net.createServer();await new Promise(r=>probe.listen(0,'127.0.0.1',r));const port=probe.address().port;await new Promise(r=>probe.close(r));

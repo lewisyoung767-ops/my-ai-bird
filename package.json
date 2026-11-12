@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "scripts": { "start": "node start.js", "dev": "node --watch start.js", "test": "node --test", "check": "node --check server.js && node --check public/app.js && node --check brain.js && node --check workspace.js" },
+  "scripts": { "start": "node start.js", "dev": "node --watch start.js", "test": "node --test", "check": "node --check server.js && node --check public/app.js && node --check brain.js && node --check workspace.js && node --check ai-provider.js && node --check local-runtime.js && node --check scripts/setup-local-ai.mjs" },
   "engines": { "node": ">=22" },
   "dependencies": { "dotenv": "^16.4.7", "express": "^4.21.2", "openai": "^4.77.0", "socket.io": "^4.8.1", "three": "^0.171.0" },
   "devDependencies": { "playwright": "^1.48.2" }

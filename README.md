@@ -18,7 +18,31 @@ npm start
 
 Stop the app with **Ctrl+C** in its terminal. It runs while the server is open, even when you close the browser. Closing the server stops its brain. Pause / Resume Brain affects all tabs viewing the same bird.
 
-## Give Pip an AI brain
+## Free local AI — no API key
+
+1. Stop the running Pip server with **Ctrl+C**.
+2. Double-click **Setup-Local-AI.cmd** in the updated project folder.
+3. Leave the setup window open while it downloads the official Ollama runtime (if needed) and the approximately **1.9 GB qwen2.5:3b** model. It selects a native Windows ARM64 or x64 runtime and verifies the release archive’s SHA-256 digest. No account or API key is used.
+4. Setup starts Ollama, tests a real model response, then changes the local `.env` to `AI_PROVIDER=ollama` and `DEMO_MODE=false`. Existing keys, port settings, memories and creations are preserved. If setup fails, the `.env` is not switched.
+5. Run **Start-Pip.cmd** again, refresh localhost, and look for **LOCAL AI** in the footer. Send Pip a message; it will consider it in its next cycle.
+
+The model makes its own choices, questions, requests, projects and reflections, just as in OpenAI mode. A small local model can be slower and less capable than a hosted model, especially for complex HTML games. On a 16 GB Snapdragon PC, start with the supplied 3B model; actual speed depends on available memory and CPU/GPU support. The 30-second cycle is a gap after a completed decision, not a promise of one reply every 30 seconds. Model generation can take longer, especially on the first request.
+
+Portable Ollama, model files and logs stay in the Git-ignored `.local-ai/` folder. If Ollama is already installed, setup reuses it and its existing model directory. Normal startup automatically starts Ollama if needed; it remains as a background service after you close Pip and unloads the model after five minutes without requests. Downloads need internet, but downloaded local models do not need API access. Local mode never falls back to OpenAI or a cloud model. You still use your own hardware and electricity.
+
+Manual alternative: install Ollama from https://ollama.com/download/windows, run `ollama pull qwen2.5:3b`, then set:
+
+```dotenv
+AI_PROVIDER=ollama
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=qwen2.5:3b
+AI_TIMEOUT_SECONDS=300
+DEMO_MODE=false
+```
+
+To use a different downloaded local model, change `OLLAMA_MODEL` and restart Pip. Cloud model names and non-loopback Ollama endpoints are rejected. If using an existing Ollama installation, keep its service available on port 11434.
+
+## Give Pip an OpenAI brain
 
 1. Stop the server.
 2. Open the local `.env` file with Notepad. Startup creates it automatically from `.env.example` if it is missing. Do not share or commit it.
@@ -27,6 +51,7 @@ Stop the app with **Ctrl+C** in its terminal. It runs while the server is open, 
 ```dotenv
 OPENAI_API_KEY=your_key_here
 OPENAI_MODEL=gpt-4o-mini
+AI_PROVIDER=openai
 DEMO_MODE=false
 CYCLE_SECONDS=30
 PORT=3000
@@ -64,6 +89,8 @@ Tests cover filename confinement, size limits, editing and listing, malformed AI
 - **Port already in use:** stop the other app or change `PORT=3001` in `.env`; open http://localhost:3001 instead.
 - **3D room unavailable:** enable browser hardware acceleration/WebGL and reload. The gallery and brain status still work.
 - **AI request fails:** inspect the terminal message and check your key, model access, internet and API billing. The app shows an error and retries on the next cycle without erasing its mind.
+- **Local AI unavailable:** run **Setup-Local-AI.cmd**, or start Ollama and download the configured model. The UI shows a local connection/model error instead of silently returning to scripted demo mode.
+- **Local AI takes too long:** leave its first request time to load the model, close memory-heavy apps, or try a smaller downloaded model. Increase `AI_TIMEOUT_SECONDS` up to 600 if needed.
 - **Damaged JSON data:** stop the server and repair or back up and remove the affected JSON file. Missing state is recreated; malformed state is intentionally not silently erased.
 
 The server binds only to `127.0.0.1`. This is a local companion, with no account system. Do not expose it to the public internet without adding authentication and access controls.
