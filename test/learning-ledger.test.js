@@ -29,3 +29,7 @@ test('practice schema ignores model-supplied scores and bounds lesson text',()=>
   const value=validatePractice({skill:'drawing',goal:'Try a clear outline',score:100,lesson:null,technique_id:null,evidence_file:null});assert.equal(value.score,undefined);
   assert.equal(validatePractice({skill:'A skill I invented myself',goal:'Choose my own experiment'}).skill,'A skill I invented myself');assert.throws(()=>validatePractice({skill:'',goal:'Try something'}));assert.throws(()=>validatePractice({skill:'drawing',goal:'a'.repeat(241)}));
 });
+test('switching artifact formats within a freely chosen skill does not invent an improvement trend',()=>{
+  const ledger=emptyLearning();for(let i=0;i<6;i++)recordAttempt(ledger,{filename:'result-'+i,content:'unique-'+i,review:{...review(i<3?20:100),skill:'An entirely self-chosen subject',rubric:i<3?'technical-v1:.svg':'technical-v1:.json'}});
+  assert.equal(learningSnapshot(ledger).skills[0].attempts,6);assert.equal(learningSnapshot(ledger).skills[0].trend,null);
+});

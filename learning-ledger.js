@@ -37,8 +37,8 @@ export function learningSnapshot(ledger){
     return {...lesson,evidence_file:evidence?.filename||lesson.baseline?.filename||null,improved,regressed,helpful,needs_work,status:needs_work||regressed?'revisit':helpful||improved>=2?'supported':'candidate'};
   });
   const summary=[...new Set(ledger.attempts.map(a=>a.skill).filter(Boolean))].map(skill=>{
-    const attempts=ledger.attempts.filter(a=>a.skill===skill&&!a.demo);const last=attempts.at(-1);const mean=list=>list.reduce((n,a)=>n+a.score,0)/list.length;
-    return {skill,attempts:attempts.length,latest_score:last?.score??null,trend:attempts.length>=6?Math.round(mean(attempts.slice(-3))-mean(attempts.slice(-6,-3))):null,helpful:attempts.filter(a=>a.feedback?.rating==='helpful').length,needs_work:attempts.filter(a=>a.feedback?.rating==='needs_work').length};
+    const attempts=ledger.attempts.filter(a=>a.skill===skill&&!a.demo);const last=attempts.at(-1);const comparable=attempts.filter(a=>a.rubric===last?.rubric);const mean=list=>list.reduce((n,a)=>n+a.score,0)/list.length;
+    return {skill,attempts:attempts.length,latest_score:last?.score??null,trend:comparable.length>=6?Math.round(mean(comparable.slice(-3))-mean(comparable.slice(-6,-3))):null,helpful:attempts.filter(a=>a.feedback?.rating==='helpful').length,needs_work:attempts.filter(a=>a.feedback?.rating==='needs_work').length};
   });
   return {goal:ledger.goal,skills:summary,lessons,attempts:ledger.attempts};
 }
