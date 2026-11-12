@@ -1,3 +1,4 @@
+import {extensionSchemas} from './autonomy.js';
 export const DEFAULT_LOCAL_MODEL = 'qwen2.5:3b';
 export function brainConfig(env = process.env) {
   const demo = (env.DEMO_MODE || 'true').toLowerCase() === 'true';
@@ -15,10 +16,15 @@ export function brainConfig(env = process.env) {
   return {demo,provider:demo?'demo':provider,model:demo?null:model,localURL:url.origin,timeoutMs:timeout*1000};
 }
 export function localContext(context) {
-  return {...context,
+  const result={...context,
     memories:context.memories?.slice(-5).map(m=>({...m,thought:m.thought?.slice(0,400)})),
     conversation:context.conversation?.slice(-8).map(m=>({...m,text:m.text?.slice(0,650)})),
-    files:context.files?.slice(0,2).map(f=>({name:f.name,content:f.content.slice(0,1800)}))};
+    files:context.files?.slice(0,2).map(f=>({name:f.name,content:f.content.slice(0,1800)})),
+    tasks:context.tasks?.slice(-4).map(t=>({...t,description:t.description?.slice(0,250),summary:t.summary?.slice(0,180)})),research:context.research?.slice(-2).map(r=>({...r,text:r.text?.slice(0,600),results:r.results?.slice(0,3).map(h=>({...h,snippet:h.snippet?.slice(0,100)}))})),
+    web_result:context.web_result?{...context.web_result,text:context.web_result.text?.slice(0,2000),results:context.web_result.results?.slice(0,4).map(h=>({...h,snippet:h.snippet?.slice(0,180)}))}:undefined};
+  if(JSON.stringify(result).length>14000){result.memories=result.memories?.slice(-2);result.conversation=result.conversation?.slice(-4).map(m=>({...m,text:m.text?.slice(0,350)}));result.files=result.files?.slice(0,1).map(f=>({...f,content:f.content.slice(0,1000)}));result.tasks=result.tasks?.slice(-3);result.research=result.research?.slice(-1);}
+  if(JSON.stringify(result).length>16000){result.files=[];result.memories=result.memories?.slice(-1);result.conversation=result.conversation?.slice(-2);result.research=[];result.tasks=result.tasks?.slice(-2);if(result.web_result?.text)result.web_result.text=result.web_result.text.slice(0,1000);}
+  return result;
 }
 export function createBrain(config,{openAIClient,fetchImpl=fetch}={}) {
   let verified=false;
@@ -44,3 +50,5 @@ export function createBrain(config,{openAIClient,fetchImpl=fetch}={}) {
 const text={type:['string','null'],maxLength:600};
 export const decisionSchema={type:'object',additionalProperties:false,required:['thought','action_label','target','create_or_edit_file','question_for_you','request_for_you','message_for_you'],properties:{thought:{type:'string',minLength:1,maxLength:800},action_label:{type:'string',minLength:1,maxLength:100},target:{type:'string',enum:['bed','bowl','desk','window','random_spot']},create_or_edit_file:{anyOf:[{type:'null'},{type:'object',additionalProperties:false,required:['filename','content'],properties:{filename:{type:'string'},content:{type:'string',maxLength:4000}}}]},question_for_you:text,request_for_you:text,message_for_you:text}};
 export const reflectionSchema={type:'object',additionalProperties:false,required:['core_traits','current_obsession','active_project','worldview'],properties:{core_traits:{type:'array',minItems:1,maxItems:8,items:{type:'string',maxLength:120}},current_obsession:{type:'string',maxLength:1000},active_project:{type:'string',maxLength:1000},worldview:{type:'string',maxLength:1000}}};
+Object.assign(decisionSchema.properties,extensionSchemas,{mind_update:{anyOf:[{type:'null'},reflectionSchema]}});
+decisionSchema.required.push(...Object.keys(extensionSchemas),'mind_update');

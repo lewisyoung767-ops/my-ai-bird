@@ -12,7 +12,7 @@ test('demo server starts, serves room, seeds gallery, and exposes working Socket
   const temp=await fs.mkdtemp(path.join(os.tmpdir(),'pip-smoke-'));
   let child;
   try{
-    for(const name of ['server.js','workspace.js','brain.js','ai-provider.js','package.json'])await fs.copyFile(path.join(project,name),path.join(temp,name));
+    for(const name of ['server.js','workspace.js','brain.js','autonomy.js','features.js','web-reader.js','autonomy-prompt.js','ai-provider.js','package.json'])await fs.copyFile(path.join(project,name),path.join(temp,name));
     await fs.cp(path.join(project,'public'),path.join(temp,'public'),{recursive:true});
     await fs.symlink(path.join(project,'node_modules'),path.join(temp,'node_modules'),process.platform==='win32'?'junction':'dir');
     const probe=net.createServer();await new Promise(r=>probe.listen(0,'127.0.0.1',r));const port=probe.address().port;await new Promise(r=>probe.close(r));
@@ -23,8 +23,8 @@ test('demo server starts, serves room, seeds gallery, and exposes working Socket
     assert.ok(ready,log);assert.equal((await (await fetch(base+'/api/health')).json()).demo,true);
     assert.match(await (await fetch(base)).text(),/Pip/);
     const files=await (await fetch(base+'/api/creations')).json();assert.ok(files.some(f=>f.name.endsWith('.svg')));assert.ok(files.some(f=>f.name.endsWith('.txt')));
-    const source=await (await fetch(base+'/api/creations/moon-moth.svg')).json();assert.match(source.content,/<svg/);
-    const preview=await fetch(base+'/api/preview/moon-moth.svg');assert.equal(preview.status,200);assert.match(preview.headers.get('content-security-policy'),/sandbox allow-scripts/);assert.match(preview.headers.get('content-security-policy'),/connect-src 'none'/);
+    const source=await (await fetch(base+'/api/creations/first-sketch.svg')).json();assert.match(source.content,/<svg/);
+    const preview=await fetch(base+'/api/preview/first-sketch.svg');assert.equal(preview.status,200);assert.match(preview.headers.get('content-security-policy'),/sandbox allow-scripts/);assert.match(preview.headers.get('content-security-policy'),/connect-src 'none'/);
     assert.equal((await fetch(base+'/api/creations/CON.txt')).status,400);
     assert.equal((await fetch(base+'/vendor/three.module.js')).status,200);
     assert.equal((await fetch(base+'/.env')).status,404);

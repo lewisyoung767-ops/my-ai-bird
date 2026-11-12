@@ -21,7 +21,7 @@ test('local configuration refuses cloud hosts, credentials, cloud models and inv
 test('local requests use JSON schemas and bounded context, with no API key or cloud fallback',async()=>{
   const calls=[];
   const ask=createBrain(config(),{fetchImpl:async(url,options)=>{calls.push({url,options,body:JSON.parse(options.body)});return url.endsWith('/api/show')?json({details:{family:'qwen2'}}):json({done:true,message:{content:JSON.stringify(decision)}});},openAIClient:{chat:{completions:{create(){throw new Error('Must not call OpenAI');}}}}});
-  assert.deepEqual(validateDecision(await ask('Choose your own action',{memories:[],conversation:[],files:[]},decisionSchema)),decision);
+  assert.deepEqual(validateDecision(await ask('Choose your own action',{memories:[],conversation:[],files:[]},decisionSchema)),{...decision,web_action:null,task_update:null,scene_action:null,mind_update:null});
   assert.equal(calls.length,2);assert.equal(calls[1].body.format.properties.target.enum.includes('window'),true);assert.equal(calls[1].body.stream,false);assert.equal(calls[1].body.options.num_ctx,8192);
   assert.equal(calls[1].options.headers.Authorization,undefined);assert.ok(calls.every(c=>c.url.startsWith('http://127.0.0.1:11434/')));
   await ask('Choose again',{},decisionSchema);assert.equal(calls.filter(c=>c.url.endsWith('/api/show')).length,1);
@@ -42,7 +42,7 @@ test('missing models, offline service, malformed output and truncated output sur
 });
 test('small-model context preserves recent conversations and bounded creation excerpts',()=>{
   const bounded=localContext({mind:initialMind,memories:Array(30).fill({thought:'a'.repeat(800)}),conversation:Array(30).fill({text:'b'.repeat(1200)}),files:Array(3).fill({name:'a.txt',content:'c'.repeat(9000)})});
-  assert.equal(bounded.memories.length,5);assert.equal(bounded.memories[0].thought.length,400);assert.equal(bounded.conversation.length,8);assert.equal(bounded.files.length,2);assert.equal(bounded.files[0].content.length,1800);
+  assert.ok(bounded.memories.length<=5);assert.ok(bounded.memories[0].thought.length<=400);assert.ok(bounded.conversation.length<=8);assert.ok(bounded.files.length<=2);assert.ok(bounded.files[0].content.length<=1800);assert.ok(JSON.stringify(bounded).length<=16000);
 });
 test('setup changes only intended environment values and preserves private keys',()=>{
   const source='OPENAI_API_KEY=private-test-key\r\nDEMO_MODE=true\r\nPORT=3001\r\n';
