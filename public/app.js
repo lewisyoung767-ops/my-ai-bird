@@ -1,7 +1,12 @@
+import {installWorkshop} from './workshop.js';
+import {createDecorations} from './room-decorations.js';
 import * as THREE from '/vendor/three.module.js';
 
 const $ = id => document.getElementById(id);
 const socket = io();
+let worldState,updateWorld;
+socket.on('world',world=>{worldState=world;updateWorld?.(world);});
+installWorkshop({socket,getState:()=>state,openCreation:async name=>{$('gallery').showModal();await refreshFiles();await openFile(name);}});
 let state, bird, scene, renderer, camera, deskLight, sparkles, yaw = .68, currentFile, downloadUrl, showSource = false;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const destinations = { bed: new THREE.Vector3(-2.05, .64, -1.45), bowl: new THREE.Vector3(2.15, .18, 1.8), desk: new THREE.Vector3(1.8, 1.55, -1.35), window: new THREE.Vector3(-.5, 1.9, -2.3), random_spot:new THREE.Vector3(0,.18,1) };
@@ -104,7 +109,8 @@ function initRoom(){
   function box(w,h,d,m,x,y,z,parent=scene){const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
   function ball(x,y,z,sx,sy,sz,m,parent=scene){const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),m);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);mesh.castShadow=true;parent.add(mesh);return mesh;}
   function cylinder(r1,r2,h,m,x,y,z,parent=scene){const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,32),m);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
-  box(6.6,.25,5.8,mat.oak,0,-.15,0);
+  mat.floor=mat.oak.clone();
+  box(6.6,.25,5.8,mat.floor,0,-.15,0);
   for(let z=-2.75;z<2.9;z+=.42)box(6.5,.008,.012,mat.wood,0,-.02,z);
   box(.16,3.8,5.8,mat.sage,-3.3,1.8,0);
   // Back wall segments leave an actual opening for the window.
@@ -152,6 +158,8 @@ function initRoom(){
   canvas.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;canvas.setPointerCapture(e.pointerId);});canvas.addEventListener('pointerup',()=>dragging=false);canvas.addEventListener('pointercancel',()=>dragging=false);
   canvas.addEventListener('pointermove',e=>{if(dragging){yaw=THREE.MathUtils.clamp(yaw-(e.clientX-lastX)*.003,-.15,1.12);lastX=e.clientX;}});
   new ResizeObserver(()=>{const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}).observe(canvas);
+  updateWorld=createDecorations(scene,{floorMaterial:mat.floor,wallMaterials:[mat.sage,mat.wall]});
+  if(worldState)updateWorld(worldState);
   let previous=performance.now();
   function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-previous)/1000,.05);previous=now;const t=now/1000;
     camera.position.set(Math.sin(yaw)*11,7.7,Math.cos(yaw)*11);camera.lookAt(0,.95,0);

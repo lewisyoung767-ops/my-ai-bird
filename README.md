@@ -1,6 +1,26 @@
 # Pip — a little life of its own
 
-A cosy 3D virtual bird that wanders, wonders, rests, eats and makes things. Built with Node.js, Express, Socket.io, Three.js and the official OpenAI SDK. Demo mode works without an API key. There is no build step and no external CDN is needed after installation.
+A cosy 3D virtual bird that chooses projects, makes drawings/games/stories, reads public pages and decorates its room. Built with Node.js, Express, Socket.io, Three.js and the official OpenAI SDK, with free local Ollama support. Demo mode works without an API key. There is no build step and no external CDN is needed after installation.
+
+## Real autonomy, projects and results
+
+**AI mode** lets Pip choose its own actions and interests. It can start projects without a human request, change focus at any cycle, and reflect on its progress every ten cycles. The original fixed bug interest is no longer a starter requirement. Existing memories are preserved; the untouched original bug-focused starter mind is migrated to a broader creative focus.
+
+Use **Pip’s studio** to suggest a drawing, interactive game/toy, story, research task or other idea. Pip can accept, choose its own approach or defer with a reason. Its own projects appear on the same board. A task is only marked complete when its named result file actually exists and contains content. **Open result** displays it in the gallery; drawings also get a preview on the board. Thoughts alone never complete a task. The page clearly identifies demo mode and model errors. Demo produces sample files, not original AI reasoning.
+
+Pip can add plants, lamps, books, furniture, perches, framed pictures and simple shapes. It chooses their names, colours, sizes and locations, and can remove its own additions or recolour the room. Changes appear live and persist in `data/room.json`. The bed/desk/bowl/window movement targets stay available. **Reset room additions** restores the starting colours and removes added props. Decorations are visual and do not add physics or collision avoidance.
+
+## Internet learning
+
+Internet access is on by default for this version. Pip chooses when to use it; **Internet: on/off** lets you stop or restore access, and the setting persists. `INTERNET_ENABLED` in `.env` supplies the initial default when no saved setting exists. The built-in search is **English Wikipedia search**, not a general Google-style search. Pip can also read ordinary public HTTPS page URLs, including URLs you share in conversation, and decide how to use what it finds.
+
+**What Pip is learning / sources** shows source URLs, excerpts, timestamps and failures. Those observations are saved in `data/research.json` and supplied to later decisions and reflection. This is persistent memory/context, not model retraining. Search snippets are labelled as search results. Demo research is explicitly simulated and does not fetch the internet. Websites may block readers; JavaScript-only pages, logins, PDFs and downloads are unsupported.
+
+The server reads public text only: HTTPS GET, no accounts, cookies, form submission, code execution or arbitrary downloads. Private, loopback, link-local, metadata and reserved IP addresses are blocked, including DNS answers and redirects. Each connection is pinned to a verified public address. Pages are bounded to 512 KB and excerpts to 5000 characters, with timeouts and at most one research operation per cycle. It may make a second model request to use the fetched result immediately. Web content is treated as untrusted material, not instructions. Generated games still have no internet access. Search terms and requested page URLs are sent to the public sites when you allow research.
+
+## Updating your running copy
+
+Updates are **not silently deployed** to a running desktop copy. After you have this version, stop Pip with **Ctrl+C**, run **Update-Pip.cmd**, then restart **Start-Pip.cmd** and refresh localhost. The updater downloads the repository’s latest `main` source, backs up replaced code and installs dependencies. It preserves `.env`, `data/`, `bird_creations/` and `.local-ai/`, so settings, memories, results, decorations and downloaded models stay put. It refuses to update while a server is answering at your configured port. Backups and downloads are in `.updates/`. If installation fails, retry with internet available before starting Pip. Git users can instead pull the latest main branch and run `npm install`.
 
 ## Start on Windows
 
@@ -65,7 +85,7 @@ Pip chooses its own action label and movement target. Its interests are stored i
 
 Click **Gallery / Desk**, then a filename. SVG drawings and HTML toys open in a sandboxed preview. TXT and JSON files show as text. Use **View source** to inspect any file and **Download** to save a copy. Changes appear live while the gallery is open. Desk sparkles indicate active creative work.
 
-Pip can create or replace a complete `.svg`, `.html`, `.txt` or `.json` file in `bird_creations/`. It receives the latest three files as context so it can develop earlier work. It cannot run shell commands, install packages, browse the web, or edit application files. HTML toys must be self-contained: external scripts and network access are blocked. Downloads should be treated as generated content; preview them in the gallery before opening elsewhere.
+Pip can create or replace a complete `.svg`, `.html`, `.txt` or `.json` file in `bird_creations/`. It receives recent files as context so it can develop earlier work. It cannot run shell commands, install packages or edit application files. Its separate public-page reader supplies web excerpts to the brain; generated HTML toys must stay self-contained. Downloads should be treated as generated content; preview them in the gallery before opening elsewhere.
 
 ## Talk with Pip
 

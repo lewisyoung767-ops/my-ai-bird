@@ -21,7 +21,7 @@ test('local configuration refuses cloud hosts, credentials, cloud models and inv
 test('local requests use JSON schemas and bounded context, with no API key or cloud fallback',async()=>{
   const calls=[];
   const ask=createBrain(config(),{fetchImpl:async(url,options)=>{calls.push({url,options,body:JSON.parse(options.body)});return url.endsWith('/api/show')?json({details:{family:'qwen2'}}):json({done:true,message:{content:JSON.stringify(decision)}});},openAIClient:{chat:{completions:{create(){throw new Error('Must not call OpenAI');}}}}});
-  assert.deepEqual(validateDecision(await ask('Choose your own action',{memories:[],conversation:[],files:[]},decisionSchema)),decision);
+  assert.deepEqual(validateDecision(await ask('Choose your own action',{memories:[],conversation:[],files:[]},decisionSchema)),{...decision,web_action:null,task_update:null,scene_action:null,mind_update:null});
   assert.equal(calls.length,2);assert.equal(calls[1].body.format.properties.target.enum.includes('window'),true);assert.equal(calls[1].body.stream,false);assert.equal(calls[1].body.options.num_ctx,8192);
   assert.equal(calls[1].options.headers.Authorization,undefined);assert.ok(calls.every(c=>c.url.startsWith('http://127.0.0.1:11434/')));
   await ask('Choose again',{},decisionSchema);assert.equal(calls.filter(c=>c.url.endsWith('/api/show')).length,1);

@@ -6,7 +6,9 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-if not exist node_modules\express\package.json (
+set "PIP_NEEDS_INSTALL="
+for %%P in (express socket.io openai three dotenv cheerio ipaddr.js) do if not exist "node_modules\%%P\package.json" set "PIP_NEEDS_INSTALL=1"
+if defined PIP_NEEDS_INSTALL (
   call npm.cmd install
   if errorlevel 1 (
     echo Dependencies could not be installed. Check your internet connection and Node.js installation.
